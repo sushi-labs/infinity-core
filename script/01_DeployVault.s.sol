@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 import "forge-std/Script.sol";
 import {BaseScript} from "./BaseScript.sol";
-import {Vault} from "../src/Vault.sol";
+import {SushiSwapV4Vault} from "../src/SushiSwapV4Vault.sol";
 import {Create3Factory} from "pancake-create3-factory/src/Create3Factory.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -20,7 +20,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  */
 contract DeployVaultScript is BaseScript {
     function getDeploymentSalt() public pure override returns (bytes32) {
-        return keccak256("INFINITY-CORE/VAULT/1.0.0");
+        return keccak256("SUSHISWAP-V4/SushiSwapV4Vault/1.0.0");
     }
 
     function run() public {
@@ -37,8 +37,8 @@ contract DeployVaultScript is BaseScript {
 
         address vault = factory.deploy(
             getDeploymentSalt(),
-            type(Vault).creationCode,
-            keccak256(type(Vault).creationCode),
+            type(SushiSwapV4Vault).creationCode,
+            keccak256(type(SushiSwapV4Vault).creationCode),
             0,
             afterDeploymentExecutionPayload,
             0
@@ -46,14 +46,14 @@ contract DeployVaultScript is BaseScript {
 
         /// @notice accept ownership so that in the following steps,
         /// the deployer address has right to register apps onto the vault
-        Vault(vault).acceptOwnership();
+        SushiSwapV4Vault(vault).acceptOwnership();
 
         /// @notice transfer ownership to the pool owner,
         /// in 2-step process this won't take effect until new owner accepts the ownership
         /// Hence, this won't block the deployment process
         Ownable(vault).transferOwnership(getAddressFromConfig("poolOwner"));
 
-        console.log("Vault contract deployed at ", vault);
+        console.log("SushiSwapV4Vault contract deployed at ", vault);
 
         vm.stopBroadcast();
     }
