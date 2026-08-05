@@ -4,8 +4,8 @@ pragma solidity 0.8.26;
 
 import {ProtocolFeeController} from "./ProtocolFeeController.sol";
 
-/// @title SushiSwap V4 Protocol Fee Controller
-/// @notice Controls protocol fees for the SushiSwap V4 pool manager.
-contract SushiSwapV4ProtocolFeeController is ProtocolFeeController {
+/// @title SushiSwap V4 CL Protocol Fee Controller
+/// @notice Controls protocol fees for the SushiSwap V4 CL pool manager.
+contract SushiSwapV4CLProtocolFeeController is ProtocolFeeController {
     constructor(address poolManager) ProtocolFeeController(poolManager) {}
 }

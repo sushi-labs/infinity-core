@@ -5,7 +5,7 @@ import "forge-std/Script.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Create3Factory} from "pancake-create3-factory/src/Create3Factory.sol";
 import {BaseScript} from "./BaseScript.sol";
-import {SushiSwapV4PoolManagerOwner} from "../src/pool-cl/SushiSwapV4PoolManagerOwner.sol";
+import {SushiSwapV4CLPoolManagerOwner} from "../src/pool-cl/SushiSwapV4CLPoolManagerOwner.sol";
 
 /**
  * Step 1: Deploy
@@ -21,7 +21,7 @@ import {SushiSwapV4PoolManagerOwner} from "../src/pool-cl/SushiSwapV4PoolManager
  */
 contract DeployCLPoolManagerOwnerScript is BaseScript {
     function getDeploymentSalt() public pure override returns (bytes32) {
-        return keccak256("SUSHISWAP-V4/SushiSwapV4PoolManagerOwner/1.0.0");
+        return keccak256("SUSHISWAP-V4/SushiSwapV4CLPoolManagerOwner/1.0.0");
     }
 
     function run() public {
@@ -36,7 +36,7 @@ contract DeployCLPoolManagerOwnerScript is BaseScript {
 
         /// @dev append the poolManager address to the creationCode
         bytes memory creationCode =
-            abi.encodePacked(type(SushiSwapV4PoolManagerOwner).creationCode, abi.encode(clPoolManager));
+            abi.encodePacked(type(SushiSwapV4CLPoolManagerOwner).creationCode, abi.encode(clPoolManager));
 
         /// @dev prepare the payload to transfer ownership from deployment contract to poolOwner address
         bytes memory afterDeploymentExecutionPayload =
@@ -45,7 +45,7 @@ contract DeployCLPoolManagerOwnerScript is BaseScript {
         address clPoolManagerOwner = factory.deploy(
             getDeploymentSalt(), creationCode, keccak256(creationCode), 0, afterDeploymentExecutionPayload, 0
         );
-        console.log("SushiSwapV4PoolManagerOwner contract deployed at ", clPoolManagerOwner);
+        console.log("SushiSwapV4CLPoolManagerOwner contract deployed at ", clPoolManagerOwner);
 
         vm.stopBroadcast();
     }

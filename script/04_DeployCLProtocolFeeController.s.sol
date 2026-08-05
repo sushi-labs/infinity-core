@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 import "forge-std/Script.sol";
 import {BaseScript} from "./BaseScript.sol";
-import {SushiSwapV4ProtocolFeeController} from "../src/SushiSwapV4ProtocolFeeController.sol";
+import {SushiSwapV4CLProtocolFeeController} from "../src/SushiSwapV4CLProtocolFeeController.sol";
 import {Create3Factory} from "pancake-create3-factory/src/Create3Factory.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IProtocolFees} from "../src/interfaces/IProtocolFees.sol";
@@ -29,7 +29,7 @@ import {IProtocolFees} from "../src/interfaces/IProtocolFees.sol";
  */
 contract DeployCLProtocolFeeControllerScript is BaseScript {
     function getDeploymentSalt() public pure override returns (bytes32) {
-        return keccak256("SUSHISWAP-V4/SushiSwapV4ProtocolFeeController/1.0.0");
+        return keccak256("SUSHISWAP-V4/SushiSwapV4CLProtocolFeeController/1.0.0");
     }
 
     function run() public {
@@ -43,7 +43,7 @@ contract DeployCLProtocolFeeControllerScript is BaseScript {
 
         /// @dev append the clPoolManager address to the creationCode
         bytes memory creationCode =
-            abi.encodePacked(type(SushiSwapV4ProtocolFeeController).creationCode, abi.encode(clPoolManager));
+            abi.encodePacked(type(SushiSwapV4CLProtocolFeeController).creationCode, abi.encode(clPoolManager));
 
         /// @dev prepare the payload to transfer ownership from deployer to real owner
         bytes memory afterDeploymentExecutionPayload = abi.encodeWithSelector(
@@ -54,7 +54,7 @@ contract DeployCLProtocolFeeControllerScript is BaseScript {
             getDeploymentSalt(), creationCode, keccak256(creationCode), 0, afterDeploymentExecutionPayload, 0
         );
 
-        console.log("SushiSwapV4ProtocolFeeController contract deployed at ", clProtocolFeeController);
+        console.log("SushiSwapV4CLProtocolFeeController contract deployed at ", clProtocolFeeController);
 
         vm.stopBroadcast();
     }
@@ -70,7 +70,8 @@ contract DeployCLProtocolFeeControllerScript is BaseScript {
         console.log("clProtocolFeeController address: ", address(clProtocolFeeController));
 
         /// @notice set the protocol fee controller for the clPoolManager
-        IProtocolFees(clPoolManager).setProtocolFeeController(SushiSwapV4ProtocolFeeController(clProtocolFeeController));
+        IProtocolFees(clPoolManager)
+            .setProtocolFeeController(SushiSwapV4CLProtocolFeeController(clProtocolFeeController));
 
         vm.stopBroadcast();
     }
