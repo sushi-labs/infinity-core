@@ -27,9 +27,17 @@ abstract contract BaseScript is Script {
         return decodedData;
     }
 
-    /// @notice must be implemented by the inheriting contract to make sure eth deployment salt is unique
-    /// since the deployment salt will be the only factor to decide the address of the newly deployed contract
-    function getDeploymentSalt() public pure virtual returns (bytes32) {
-        revert("Deployment salt not set !");
+    function validateDeployer(uint256 deployerPrivateKey, uint64 expectedNonce) internal view returns (address deployer) {
+        deployer = vm.addr(deployerPrivateKey);
+        require(deployer == getAddressFromConfig("deployer"), "Unexpected deployer");
+        require(vm.getNonce(deployer) == expectedNonce, "Unexpected deployer nonce");
+    }
+
+    function validateDeployment(address deployment, string memory configKey) internal view {
+        require(deployment == getAddressFromConfig(configKey), "Unexpected deployment address");
+    }
+
+    function validateContract(address target) internal view {
+        require(target.code.length > 0, "Dependency not deployed");
     }
 }

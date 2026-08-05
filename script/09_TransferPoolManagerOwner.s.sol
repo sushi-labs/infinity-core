@@ -3,30 +3,48 @@ pragma solidity ^0.8.24;
 
 import "forge-std/Script.sol";
 import {BaseScript} from "./BaseScript.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable as OpenZeppelinOwnable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  *
- * forge script script/06_TransferPoolManagerOwner.s.sol:TransferPoolManagerOwner -vvv \
+ * Starts the governance handoff after all deployments and CL setup are complete.
+ * The multisig must subsequently call acceptOwnership on each two-step contract.
+ *
+ * forge script script/09_TransferPoolManagerOwner.s.sol:TransferGovernanceOwnership -vvv \
  *     --rpc-url $RPC_URL \
  *     --broadcast \
  *     --slow
  *
  */
-contract TransferPoolManagerOwner is BaseScript {
+contract TransferGovernanceOwnership is BaseScript {
     function run() public {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(deployerPrivateKey);
+        address deployer = vm.addr(deployerPrivateKey);
+        require(deployer == getAddressFromConfig("deployer"), "Unexpected deployer");
+        require(vm.getNonce(deployer) >= 8, "CL deployment sequence incomplete");
 
-        address clPoolManager = getAddressFromConfig("clPoolManager");
-        address binPoolManager = getAddressFromConfig("binPoolManager");
         address poolOwner = getAddressFromConfig("poolOwner");
+        address protocolFeeControllerOwner = getAddressFromConfig("protocolFeeControllerOwner");
+        address vault = getAddressFromConfig("vault");
+        address clPoolManagerOwner = getAddressFromConfig("clPoolManagerOwnerContract");
+        address clProtocolFeeController = getAddressFromConfig("clProtocolFeeController");
 
-        Ownable(clPoolManager).transferOwnership(poolOwner);
-        console.log("clPoolManager Ownership transferred to ", address(poolOwner));
+        validateContract(vault);
+        validateContract(clPoolManagerOwner);
+        validateContract(clProtocolFeeController);
+        require(OpenZeppelinOwnable(vault).owner() == deployer, "Deployer does not own Vault");
+        require(OpenZeppelinOwnable(clPoolManagerOwner).owner() == deployer, "Deployer does not own manager owner");
+        require(
+            OpenZeppelinOwnable(clProtocolFeeController).owner() == deployer,
+            "Deployer does not own protocol fee controller"
+        );
 
-        Ownable(binPoolManager).transferOwnership(poolOwner);
-        console.log("binPoolManager Ownership transferred to ", address(poolOwner));
+        vm.startBroadcast(deployerPrivateKey);
+        OpenZeppelinOwnable(vault).transferOwnership(poolOwner);
+        OpenZeppelinOwnable(clPoolManagerOwner).transferOwnership(poolOwner);
+        OpenZeppelinOwnable(clProtocolFeeController).transferOwnership(protocolFeeControllerOwner);
+
+        console.log("Governance ownership transfers initiated");
 
         vm.stopBroadcast();
     }

@@ -2,10 +2,9 @@
 pragma solidity ^0.8.24;
 
 import "forge-std/Script.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {Create3Factory} from "pancake-create3-factory/src/Create3Factory.sol";
 import {BaseScript} from "./BaseScript.sol";
 import {SushiSwapV4CLPoolManagerOwner} from "../src/pool-cl/SushiSwapV4CLPoolManagerOwner.sol";
+import {ICLPoolManagerWithPauseOwnable} from "../src/pool-cl/CLPoolManagerOwner.sol";
 
 /**
  * Step 1: Deploy
@@ -20,33 +19,20 @@ import {SushiSwapV4CLPoolManagerOwner} from "../src/pool-cl/SushiSwapV4CLPoolMan
  * Step 3: (Manual) Proceed to call clPoolManager.transferOwnership(clPoolManagerOwner)
  */
 contract DeployCLPoolManagerOwnerScript is BaseScript {
-    function getDeploymentSalt() public pure override returns (bytes32) {
-        return keccak256("SUSHISWAP-V4/SushiSwapV4CLPoolManagerOwner/1.0.0");
-    }
-
     function run() public {
-        Create3Factory factory = Create3Factory(getAddressFromConfig("create3Factory"));
-
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address poolOwner = getAddressFromConfig("poolOwner");
-        vm.startBroadcast(deployerPrivateKey);
+        validateDeployer(deployerPrivateKey, 3);
 
         address clPoolManager = getAddressFromConfig("clPoolManager");
+        validateContract(clPoolManager);
         console.log("clPoolManager address: ", address(clPoolManager));
 
-        /// @dev append the poolManager address to the creationCode
-        bytes memory creationCode =
-            abi.encodePacked(type(SushiSwapV4CLPoolManagerOwner).creationCode, abi.encode(clPoolManager));
-
-        /// @dev prepare the payload to transfer ownership from deployment contract to poolOwner address
-        bytes memory afterDeploymentExecutionPayload =
-            abi.encodeWithSelector(Ownable.transferOwnership.selector, poolOwner);
-
-        address clPoolManagerOwner = factory.deploy(
-            getDeploymentSalt(), creationCode, keccak256(creationCode), 0, afterDeploymentExecutionPayload, 0
-        );
-        console.log("SushiSwapV4CLPoolManagerOwner contract deployed at ", clPoolManagerOwner);
-
+        vm.startBroadcast(deployerPrivateKey);
+        SushiSwapV4CLPoolManagerOwner clPoolManagerOwner =
+            new SushiSwapV4CLPoolManagerOwner(ICLPoolManagerWithPauseOwnable(clPoolManager));
         vm.stopBroadcast();
+
+        validateDeployment(address(clPoolManagerOwner), "clPoolManagerOwnerContract");
+        console.log("SushiSwapV4CLPoolManagerOwner contract deployed at ", address(clPoolManagerOwner));
     }
 }
