@@ -15,7 +15,7 @@ import {SushiSwapV4CLPoolManagerOwner} from "../src/pool-cl/SushiSwapV4CLPoolMan
  *     --slow \
  *     --verify
  *
- * Step 2: (Manual) Ask 'poolOwner' proceed to CLPoolManagerOwner.acceptOwnership
+ * Step 2: (Manual) Ask 'poolOwner' proceed to SushiSwapV4CLPoolManagerOwner.acceptOwnership
  *
  * Step 3: (Manual) Proceed to call clPoolManager.transferOwnership(clPoolManagerOwner)
  */
