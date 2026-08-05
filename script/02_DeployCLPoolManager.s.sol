@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 import "forge-std/Script.sol";
 import {BaseScript} from "./BaseScript.sol";
 import {IVault} from "../src/interfaces/IVault.sol";
-import {CLPoolManager} from "../src/pool-cl/CLPoolManager.sol";
+import {SushiSwapV4PoolManager} from "../src/pool-cl/SushiSwapV4PoolManager.sol";
 import {Create3Factory} from "pancake-create3-factory/src/Create3Factory.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -19,7 +19,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  */
 contract DeployCLPoolManagerScript is BaseScript {
     function getDeploymentSalt() public pure override returns (bytes32) {
-        return keccak256("INFINITY-CORE/CLPoolManager/1.0.0");
+        return keccak256("SUSHISWAP-V4/SushiSwapV4PoolManager/1.0.0");
     }
 
     function run() public {
@@ -33,7 +33,7 @@ contract DeployCLPoolManagerScript is BaseScript {
         console.log("vault address: ", address(vault));
 
         /// @dev append the vault address to the creationCode
-        bytes memory creationCode = abi.encodePacked(type(CLPoolManager).creationCode, abi.encode(vault));
+        bytes memory creationCode = abi.encodePacked(type(SushiSwapV4PoolManager).creationCode, abi.encode(vault));
 
         /// @dev prepare the payload to transfer ownership from deployment contract to real deployer address
         bytes memory afterDeploymentExecutionPayload =
@@ -42,9 +42,9 @@ contract DeployCLPoolManagerScript is BaseScript {
         address clPoolManager = factory.deploy(
             getDeploymentSalt(), creationCode, keccak256(creationCode), 0, afterDeploymentExecutionPayload, 0
         );
-        console.log("CLPoolManager contract deployed at ", clPoolManager);
+        console.log("SushiSwapV4PoolManager contract deployed at ", clPoolManager);
 
-        console.log("Registering CLPoolManager");
+        console.log("Registering SushiSwapV4PoolManager");
         IVault(address(vault)).registerApp(address(clPoolManager));
 
         vm.stopBroadcast();
