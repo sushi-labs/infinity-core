@@ -1,12 +1,9 @@
 {
-    "create3Factory": "0x38Ab3f2CE00973A51d3A2A04d634C9bcbf20e4e1",
-    "poolOwner": "0x42571B8414c68B63A2729146CE93F23639d25399",
-    "vault": "0x238a358808379702088667322f80aC48bAd5e6c4",
-    "clPoolManager": "0xa0FfB9c1CE1Fe56963B0321B32E7A0302114058b",
-    "binPoolManager": "0xC697d2898e0D09264376196696c51D7aBbbAA4a9",
-    "protocolFeeControllerOwner": "0x42571B8414c68B63A2729146CE93F23639d25399",
-    "clProtocolFeeController": "0x15F6180033aEa66377d2A1778e418591C00dEb4c",
-    "binProtocolFeeController": "0xDBA4cFFF63d94F95A6e5DE9Cc49F0A13Af25214d",
-    "clPoolManagerOwnerContract": "0x13f818BDC906C16764d8325809B4b67A9981f792",
-    "binPoolManagerOwnerContract": "0x10944942c7EC351A4Aa36D59A40Cb741cc5c37cB"
+  "create3Factory": "0x",
+  "poolOwner": "0xfcd4e19dd044cba929cf1eefc1c181ae4f5bece8",
+  "vault": "0x",
+  "clPoolManager": "0x",
+  "protocolFeeControllerOwner": "0xfcd4e19dd044cba929cf1eefc1c181ae4f5bece8",
+  "clProtocolFeeController": "0x",
+  "clPoolManagerOwnerContract": "0x"
 }

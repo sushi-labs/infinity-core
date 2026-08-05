@@ -22,7 +22,7 @@ abstract contract BaseScript is Script {
 
         // seems like foundry decode as 0x20 when address is not set or as "0x"
         address decodedData = abi.decode(data, (address));
-        require(decodedData != address(0x20), "Address not set");
+        require(decodedData != address(0) && decodedData != address(0x20), "Address not set");
 
         return decodedData;
     }

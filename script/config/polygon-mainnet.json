@@ -1,9 +1,9 @@
 {
   "create3Factory": "0x",
-  "poolOwner": "0x19b3eb3af5d93b77a5619b047de0eed7115a19e7",
+  "poolOwner": "0x850a57630a2012b2494779fbc86bbc24f2a7baef",
   "vault": "0x",
   "clPoolManager": "0x",
-  "protocolFeeControllerOwner": "0x19b3eb3af5d93b77a5619b047de0eed7115a19e7",
+  "protocolFeeControllerOwner": "0x850a57630a2012b2494779fbc86bbc24f2a7baef",
   "clProtocolFeeController": "0x",
   "clPoolManagerOwnerContract": "0x"
 }
