@@ -5,8 +5,6 @@ import "forge-std/Script.sol";
 import {BaseScript} from "./BaseScript.sol";
 import {IVault} from "../src/interfaces/IVault.sol";
 import {SushiSwapV4CLPoolManager} from "../src/pool-cl/SushiSwapV4CLPoolManager.sol";
-import {Create3Factory} from "pancake-create3-factory/src/Create3Factory.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  *
@@ -18,35 +16,19 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  *     --verify
  */
 contract DeployCLPoolManagerScript is BaseScript {
-    function getDeploymentSalt() public pure override returns (bytes32) {
-        return keccak256("SUSHISWAP-V4/SushiSwapV4CLPoolManager/1.0.0");
-    }
-
     function run() public {
-        Create3Factory factory = Create3Factory(getAddressFromConfig("create3Factory"));
-
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address deployer = vm.addr(deployerPrivateKey);
-        vm.startBroadcast(deployerPrivateKey);
+        validateDeployer(deployerPrivateKey, 1);
 
         address vault = getAddressFromConfig("vault");
+        validateContract(vault);
         console.log("vault address: ", address(vault));
 
-        /// @dev append the vault address to the creationCode
-        bytes memory creationCode = abi.encodePacked(type(SushiSwapV4CLPoolManager).creationCode, abi.encode(vault));
-
-        /// @dev prepare the payload to transfer ownership from deployment contract to real deployer address
-        bytes memory afterDeploymentExecutionPayload =
-            abi.encodeWithSelector(Ownable.transferOwnership.selector, deployer);
-
-        address clPoolManager = factory.deploy(
-            getDeploymentSalt(), creationCode, keccak256(creationCode), 0, afterDeploymentExecutionPayload, 0
-        );
-        console.log("SushiSwapV4CLPoolManager contract deployed at ", clPoolManager);
-
-        console.log("Registering SushiSwapV4CLPoolManager");
-        IVault(address(vault)).registerApp(address(clPoolManager));
-
+        vm.startBroadcast(deployerPrivateKey);
+        SushiSwapV4CLPoolManager clPoolManager = new SushiSwapV4CLPoolManager(IVault(vault));
         vm.stopBroadcast();
+
+        validateDeployment(address(clPoolManager), "clPoolManager");
+        console.log("SushiSwapV4CLPoolManager contract deployed at ", address(clPoolManager));
     }
 }

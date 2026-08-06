@@ -42,8 +42,19 @@ forge script script/01_DeployVault.s.sol:DeployVaultScript -vvv \
     --slow
 ```
 
+The SushiSwap V4 CL release uses direct EVM `CREATE` from a dedicated deployment account. Run the
+four Core deployment scripts at nonces 0 through 3 exactly as numbered. Do not send any other
+transaction from the deployment account until the four Periphery deployments at nonces 4 through 7
+are also complete. Each script validates the signer, nonce, and expected address before continuing.
+
+Only after all eight contracts are deployed, run `08_ConfigureCL.s.sol`, then initiate the governance
+handoff with `09_TransferPoolManagerOwner.s.sol`. The configured multisig must accept ownership of the
+Vault, CL protocol fee controller, and CL pool-manager owner contract.
+
 ### Verifying
-Each script includes a verification command. Verification needs to be performed separately since the contract is deployed using the create3 method.
+
+Each script includes a verification command. Verification may be performed after the nonce-sensitive
+deployment sequence is complete.
 
 
 Example. within `script/01_DeployVault.s.sol`

@@ -4,8 +4,6 @@ pragma solidity ^0.8.24;
 import "forge-std/Script.sol";
 import {BaseScript} from "./BaseScript.sol";
 import {SushiSwapV4CLProtocolFeeController} from "../src/SushiSwapV4CLProtocolFeeController.sol";
-import {Create3Factory} from "pancake-create3-factory/src/Create3Factory.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IProtocolFees} from "../src/interfaces/IProtocolFees.sol";
 
 /**
@@ -28,35 +26,21 @@ import {IProtocolFees} from "../src/interfaces/IProtocolFees.sol";
  *     --slow
  */
 contract DeployCLProtocolFeeControllerScript is BaseScript {
-    function getDeploymentSalt() public pure override returns (bytes32) {
-        return keccak256("SUSHISWAP-V4/SushiSwapV4CLProtocolFeeController/1.0.0");
-    }
-
     function run() public {
-        Create3Factory factory = Create3Factory(getAddressFromConfig("create3Factory"));
-
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        vm.startBroadcast(deployerPrivateKey);
+        validateDeployer(deployerPrivateKey, 2);
 
         address clPoolManager = getAddressFromConfig("clPoolManager");
+        validateContract(clPoolManager);
         console.log("clPoolManager address: ", address(clPoolManager));
 
-        /// @dev append the clPoolManager address to the creationCode
-        bytes memory creationCode =
-            abi.encodePacked(type(SushiSwapV4CLProtocolFeeController).creationCode, abi.encode(clPoolManager));
-
-        /// @dev prepare the payload to transfer ownership from deployer to real owner
-        bytes memory afterDeploymentExecutionPayload = abi.encodeWithSelector(
-            Ownable.transferOwnership.selector, getAddressFromConfig("protocolFeeControllerOwner")
-        );
-
-        address clProtocolFeeController = factory.deploy(
-            getDeploymentSalt(), creationCode, keccak256(creationCode), 0, afterDeploymentExecutionPayload, 0
-        );
-
-        console.log("SushiSwapV4CLProtocolFeeController contract deployed at ", clProtocolFeeController);
-
+        vm.startBroadcast(deployerPrivateKey);
+        SushiSwapV4CLProtocolFeeController clProtocolFeeController =
+            new SushiSwapV4CLProtocolFeeController(clPoolManager);
         vm.stopBroadcast();
+
+        validateDeployment(address(clProtocolFeeController), "clProtocolFeeController");
+        console.log("SushiSwapV4CLProtocolFeeController contract deployed at ", address(clProtocolFeeController));
     }
 
     function setProtocolFeeController() public {
