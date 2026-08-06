@@ -3,6 +3,9 @@ pragma solidity ^0.8.24;
 
 import "forge-std/Script.sol";
 import {BaseScript} from "./BaseScript.sol";
+import {IVault} from "../src/interfaces/IVault.sol";
+import {IProtocolFees} from "../src/interfaces/IProtocolFees.sol";
+import {Ownable as PoolManagerOwnable} from "../src/base/Ownable.sol";
 import {Ownable as OpenZeppelinOwnable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
@@ -26,12 +29,22 @@ contract TransferGovernanceOwnership is BaseScript {
         address poolOwner = getAddressFromConfig("poolOwner");
         address protocolFeeControllerOwner = getAddressFromConfig("protocolFeeControllerOwner");
         address vault = getAddressFromConfig("vault");
+        address clPoolManager = getAddressFromConfig("clPoolManager");
         address clPoolManagerOwner = getAddressFromConfig("clPoolManagerOwnerContract");
         address clProtocolFeeController = getAddressFromConfig("clProtocolFeeController");
 
         validateContract(vault);
+        validateContract(clPoolManager);
         validateContract(clPoolManagerOwner);
         validateContract(clProtocolFeeController);
+        validateContract(poolOwner);
+        validateContract(protocolFeeControllerOwner);
+        require(IVault(vault).isAppRegistered(clPoolManager), "Run 08_ConfigureCL first");
+        require(
+            address(IProtocolFees(clPoolManager).protocolFeeController()) == clProtocolFeeController,
+            "CL fee controller not configured"
+        );
+        require(PoolManagerOwnable(clPoolManager).owner() == clPoolManagerOwner, "CL manager owner not configured");
         require(OpenZeppelinOwnable(vault).owner() == deployer, "Deployer does not own Vault");
         require(OpenZeppelinOwnable(clPoolManagerOwner).owner() == deployer, "Deployer does not own manager owner");
         require(

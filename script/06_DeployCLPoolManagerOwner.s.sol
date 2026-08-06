@@ -13,10 +13,8 @@ import {ICLPoolManagerWithPauseOwnable} from "../src/pool-cl/CLPoolManagerOwner.
  *     --broadcast \
  *     --slow \
  *     --verify
- *
- * Step 2: (Manual) Ask 'poolOwner' proceed to SushiSwapV4CLPoolManagerOwner.acceptOwnership
- *
- * Step 3: (Manual) Proceed to call clPoolManager.transferOwnership(clPoolManagerOwner)
+ * Do not perform setup or ownership transactions after this script. Continue with the four Periphery
+ * deployments at nonces 4 through 7, then run 08_ConfigureCL.s.sol.
  */
 contract DeployCLPoolManagerOwnerScript is BaseScript {
     function run() public {
