@@ -13,6 +13,9 @@ abstract contract BaseScript is Script {
         string memory root = vm.projectRoot();
         path = string.concat(root, "/script/config/", scriptConfig, ".json");
         console.log("[BaseScript] Reading config from: ", path);
+
+        uint256 configuredChainId = getUint256FromConfig("chainId");
+        require(block.chainid == configuredChainId, "SCRIPT_CONFIG does not match RPC chain");
     }
 
     // reference: https://github.com/foundry-rs/foundry/blob/master/testdata/default/cheats/Json.t.sol
@@ -27,7 +30,19 @@ abstract contract BaseScript is Script {
         return decodedData;
     }
 
-    function validateDeployer(uint256 deployerPrivateKey, uint64 expectedNonce) internal view returns (address deployer) {
+    function getUint256FromConfig(string memory key) public view returns (uint256 decodedData) {
+        string memory json = vm.readFile(path);
+        bytes memory data = vm.parseJson(json, string.concat(".", key));
+
+        decodedData = abi.decode(data, (uint256));
+        require(decodedData > 0, "Uint256 not set");
+    }
+
+    function validateDeployer(uint256 deployerPrivateKey, uint64 expectedNonce)
+        internal
+        view
+        returns (address deployer)
+    {
         deployer = vm.addr(deployerPrivateKey);
         require(deployer == getAddressFromConfig("deployer"), "Unexpected deployer");
         require(vm.getNonce(deployer) == expectedNonce, "Unexpected deployer nonce");
